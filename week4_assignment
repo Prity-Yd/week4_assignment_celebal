@@ -1,0 +1,94 @@
+
+                      # Weather Observation 8 #
+
+
+1.) SELECT distinct city FROM station WHERE left(city, 1) IN ('A', 'E', 'I', 'O', 'U', 'a', 'e', 'i', 'o', 'u') 
+    and right(city,1) in ('A', 'E', 'I', 'O', 'U', 'a', 'e', 'i', 'o', 'u');
+
+
+2.) SELECT Max(POPULATION)-Min(POPULATION) FROM CITY;
+
+
+3.) SELECT ROUND(SQRT(POW(MAX(LAT_N)-MIN(LAT_N),2) + POW(MAX(LONG_W)-MIN(LONG_W),2)) , 4) FROM STATION;
+
+
+4.) SELECT ROUND(lat_n, 4)
+    FROM (
+	   SELECT LAT_N, RANK() OVER(ORDER BY lat_n ASC) AS ranked
+	   FROM station
+	 ) AS station_temp
+    WHERE ranked = (SELECT ROUND(COUNT(*) / 2) FROM station);
+
+
+5.) SELECT CITY.NAME FROM CITY LEFT JOIN COUNTRY ON CITY.CountryCode = COUNTRY.Code WHERE COUNTRY.CONTINENT = "AFRICA";
+
+
+6.) SELECT CITY.NAME FROM CITY INNER JOIN COUNTRY ON CITY.CountryCode = COUNTRY.Code WHERE COUNTRY.CONTINENT = 'AFRICA';
+
+
+7.) SELECT 
+    CASE WHEN G.Grade < 8 THEN NULL ELSE S.Name END AS Name,
+    G.Grade,
+    S.Marks
+    FROM 
+    Students S
+    INNER JOIN 
+    Grades G ON S.Marks BETWEEN G.Min_Mark AND G.Max_Mark
+    ORDER BY
+    G.Grade DESC,  
+    CASE WHEN G.Grade >= 8 THEN S.Name END, 
+    CASE WHEN G.Grade < 8 THEN S.Marks END;
+
+
+8.) select h.hacker_id, h.name
+    from hackers as h 
+    inner join submissions as s
+    on h.hacker_id=s.hacker_id
+    inner join challenges as c 
+    on s.challenge_id=c.challenge_id 
+    inner join difficulty as d 
+    on c.difficulty_level=d.difficulty_level
+    where d.score=s.score
+    group by h.hacker_id,h.name
+    having count(h.hacker_id)>1
+    order by count(h.hacker_id) desc, h.hacker_id asc;
+
+
+9.) SELECT W.id, WP.age, W.coins_needed, W.power 
+    FROM Wands W INNER JOIN Wands_Property WP ON W.code=WP.code 
+    WHERE 
+    ((W.coins_needed, W.power, WP.age) IN 
+    (SELECT MIN(W.coins_needed) AS coins_needed, W.power, WP.age FROM Wands W INNER JOIN Wands_Property WP ON W.code=WP.code               
+     GROUP BY W.power, WP.age)) 
+     AND 
+   (is_evil=0) 
+   ORDER BY W.power DESC, WP.age DESC;
+
+
+10.) select
+	h.hacker_id,
+	h.name,
+	sum(s.score)
+     from
+	hackers h
+	inner join
+	(
+	  select
+	  hacker_id,
+	  challenge_id,
+	  max(score) as score
+	  from
+	  submissions
+	  group by 
+	  hacker_id,
+	  challenge_id
+	) as s
+	  on h.hacker_id = s.hacker_id
+          group by
+	  h.hacker_id,
+	  h.name
+          having
+	  sum(s.score) <> 0
+          order by
+	  sum(s.score) desc,
+	  h.hacker_id;
